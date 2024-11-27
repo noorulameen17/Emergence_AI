@@ -1,0 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Bungee+Tint&family=Handjet:wght@100..900&family=Nabla&family=Passero+One&family=Rubik+Distressed&family=Silkscreen:wght@400;700&display=swap');
+
+.passero-one-regular {
+  font-family: "Passero One", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+.nabla-regular {
+  font-family: "Nabla", system-ui;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-variation-settings:
+    "EDPT" 100,
+    "EHLT" 12;
+}
+.silkscreen-bold {
+  font-family: "Silkscreen", serif;
+  font-weight: 700;
+  font-style: normal;
+}
+.rubik-distressed-regular {
+  font-family: "Rubik Distressed", system-ui;
+  font-weight: 400;
+  font-style: normal;
+}
+.handjet-regular {
+  font-family: "Handjet", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-variation-settings:
+    "ELGR" 1,
+    "ELSH" 2;
+}
