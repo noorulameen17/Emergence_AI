@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { Cerebras } from "@cerebras/cerebras_cloud_sdk";
 
+const cerebras = new Cerebras( {
+  apiKey: process.env.CEREBAS_API_KEY,
+});
+
 const systemPrompt = `
 You are a Disaster Management AI. Provide concise, actionable advice:
 
@@ -17,7 +21,6 @@ Please Only Ask For Disaster-Related Advice.
 
 export async function POST(req) {
   try {
-    const cerebras = new Cerebras();
     const data = await req.json();
 
     console.log('Received data:', data);
