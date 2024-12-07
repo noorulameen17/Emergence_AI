@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" fill="none" viewBox="0 0 128 128" id="connection">
+  <circle cx="7" cy="7" r="7" stroke="#1B1B1B" stroke-width="6" transform="matrix(1 0 0 -1 86 40)"></circle>
+  <circle cx="35" cy="33" r="7" stroke="#1B1B1B" stroke-width="6" transform="rotate(180 35 33)"></circle>
+  <circle cx="7" cy="7" r="7" stroke="#1B1B1B" stroke-width="6" transform="matrix(1 0 0 -1 86 102)"></circle>
+  <circle cx="35" cy="95" r="7" stroke="#1B1B1B" stroke-width="6" transform="rotate(180 35 95)"></circle>
+  <circle cx="7" cy="7" r="7" stroke="#1B1B1B" stroke-width="6" transform="matrix(1 0 0 -1 93 71)"></circle>
+  <circle cx="7" cy="7" r="7" stroke="#1B1B1B" stroke-width="6" transform="matrix(1 0 0 -1 21 71)"></circle>
+  <path stroke="#1B1B1B" stroke-linecap="round" stroke-width="6" d="M86 37L75.4895 44.1752C73.3061 45.6658 72 48.1387 72 50.7824V63.5 75.9669C72 78.6926 73.1669 81.1668 74.9843 82.2947L86 90M42 37L52.5105 44.1752C54.6939 45.6658 56 48.1387 56 50.7824V63.5 75.9669C56 78.6926 54.8331 81.1668 53.0157 82.2947L42 90"></path>
+</svg>

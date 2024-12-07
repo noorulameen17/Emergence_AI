@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Bungee+Tint&family=Handjet:wght@100..900&family=Nabla&family=Passero+One&family=Rubik+Distressed&family=Silkscreen:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bungee+Tint&family=DynaPuff:wght@400..700&family=Faculty+Glyphic&family=Funnel+Display:wght@300..800&family=Handjet:wght,ELSH@100..900,0&family=Nabla&family=Passero+One&family=Protest+Revolution&family=Rubik+Distressed&family=Silkscreen:wght@400;700&family=Young+Serif&display=swap');
 
 .passero-one-regular {
   font-family: "Passero One", sans-serif;
@@ -32,4 +32,46 @@
   font-variation-settings:
     "ELGR" 1,
     "ELSH" 2;
+}
+
+.faculty-glyphic-regular {
+  font-family: "Faculty Glyphic", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.young-serif-regular {
+  font-family: "Young Serif", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.dynapuff-regular {
+  font-family: "DynaPuff", system-ui;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-variation-settings:
+    "wdth" 100;
+}
+
+.funnel-display-regular {
+  font-family: "Funnel Display", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'WinterMinie';
+  src: url('/fonts/WinterMinie-3ljpz.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'AmericanPurpose';
+  src: url('/fonts/AmericanPurposeCasual01-BzqV.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
 }
