@@ -162,11 +162,11 @@ export default function Chatbot() {
           >
             {messages.map((message, index) => (
               <motion.div
+                key={index}
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: 1, scale: 1 }}
               >
                 <Box
-                  key={index}
                   display="flex"
                   justifyContent={
                     message.role === "assistant" ? "flex-start" : "flex-end"
