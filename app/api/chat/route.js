@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { Cerebras } from "@cerebras/cerebras_cloud_sdk";
+import { ReadableStream } from "stream/web";
 
 const cerebras = new Cerebras( {
   apiKey: process.env.CEREBAS_API_KEY,
