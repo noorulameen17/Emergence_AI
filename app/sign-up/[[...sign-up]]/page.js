@@ -8,11 +8,15 @@ export default function SignUpPage() {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
+        width: "100%",
+        height: "98vh",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: svgBackground,
+        backgroundImage: `url("data:image/svg+xml;utf8,${encodeURIComponent(
+          svgBackground
+        )}")`,
+        backgroundSize: "cover",
       }}
     >
       <motion.div
@@ -22,13 +26,16 @@ export default function SignUpPage() {
       >
         <Box
           sx={{
-            backgroundColor: "rgba(255, 255, 255, 0.9)",
+            backgroundImage: `url("data:image/svg+xml;utf8,${encodeURIComponent(
+              svgBackground
+            )}")`,
+            backgroundSize: "cover",
             padding: "2rem",
             borderRadius: "10px",
-            boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+            boxShadow: "0px 0px 45px rgba(0, 0, 0, 0.1)",
           }}
         >
-          <SignUp signInUrl="/sign-in" afterSignUpUrl="/generate" />
+          <SignUp signInUrl="/sign-in" fallbackRedirectUrl="/generate" />
         </Box>
       </motion.div>
     </Box>

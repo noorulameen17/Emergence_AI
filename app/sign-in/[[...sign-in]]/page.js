@@ -1,18 +1,29 @@
 "use client";
-import { Box } from "@mui/material";
+import { Box, Button } from "@mui/material";
 import { SignIn } from "@clerk/nextjs";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
+import { useRouter } from "next/navigation";
 import { svgBackground } from "../../svgBackground";
 
 export default function SignInPage() {
+  const router = useRouter();
+  
+  const handleSignInSuccess = () => {
+    router.push( "/generate" );
+  };
+
   return (
     <Box
       sx={{
         minHeight: "100vh",
         display: "flex",
+        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        background: svgBackground,
+        backgroundImage: `url("data:image/svg+xml;utf8,${encodeURIComponent(
+          svgBackground
+        )}")`,
+        backgroundSize: "cover",
       }}
     >
       <motion.div
@@ -22,15 +33,50 @@ export default function SignInPage() {
       >
         <Box
           sx={{
-            backgroundColor: "rgba(255, 255, 255, 0.9)",
+            backgroundImage: `url("data:image/svg+xml;utf8,${encodeURIComponent(
+              svgBackground
+            )}")`,
+            backgroundSize: "cover",
             padding: "2rem",
             borderRadius: "10px",
             boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
           }}
         >
-          <SignIn signUpUrl="/sign-up" afterSignInUrl="/generate" />
+          <SignIn
+            appearance={{
+              elements: {
+                formButtonPrimary: {
+                  backgroundColor: "#00695c",
+                  "&:hover": {
+                    backgroundColor: "#00897b",
+                  },
+                },
+              },
+            }}
+            signUpUrl="/sign-up"
+            onSuccess={handleSignInSuccess}
+          />
         </Box>
       </motion.div>
+
+      <Box textAlign="center" padding={3} mt={1}>
+        <Button
+          variant="outlined"
+          onClick={() => router.push("/")}
+          sx={{
+            color: "white",
+            borderColor: "white",
+            boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+            "&:hover": {
+              backgroundColor: "rgba(238, 100, 238, 0.1)",
+              borderColor: "#0CABA8",
+              boxShadow: "1px 3px 8px 5px #0CABA8",
+            },
+          }}
+        >
+          Back to Home
+        </Button>
+      </Box>
     </Box>
   );
 }

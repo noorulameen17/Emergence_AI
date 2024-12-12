@@ -37,7 +37,7 @@ export default function HomePage() {
       }}
     >
       <Box sx={{ position: "absolute", top: "1rem", right: "1rem" }}>
-        <UserButton afterSignOutUrl="/" />
+        <UserButton redirectUrl="/" />
       </Box>
       
       <motion.div
