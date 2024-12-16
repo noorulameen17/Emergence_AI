@@ -22,8 +22,15 @@ Emergence AI is an intelligent disaster management system that provides concise,
 🔗 [Live Demo](https://emergence-ai.vercel.app)
 
 ## Project Screenshots
-![Emergence AI Interface](path/to/screenshot1.png)
-![Response Example](path/to/screenshot2.png)
+## Project Screenshots
+
+<div align="center">
+  <img src="https://raw.githubusercontent.com/noorulameen17/emergence/main/public/emergence1.png" alt="Emergence AI Homepage" width="800"/>
+  <br/><br/>
+  <img src="https://raw.githubusercontent.com/noorulameen17/emergence/main/public/Emergence2.png" alt="AI Response Interface" width="800"/>
+  <br/><br/>
+  <img src="https://raw.githubusercontent.com/noorulameen17/emergence/main/public/emergence3.png" alt="AI Response Interface" width="800"/>
+</div>
 
 ## Features
 - 🎯 Focused disaster-specific responses
