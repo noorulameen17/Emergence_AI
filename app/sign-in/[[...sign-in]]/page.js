@@ -54,7 +54,7 @@ export default function SignInPage() {
               },
             }}
             signUpUrl="/sign-up"
-            onSuccess={handleSignInSuccess}
+            forceRedirectUrl="/generate"
           />
         </Box>
       </motion.div>

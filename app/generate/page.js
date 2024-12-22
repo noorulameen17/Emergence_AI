@@ -37,19 +37,19 @@ export default function Chatbot() {
       role: "assistant",
       content: "👋 Your Safety Is My Priority! How Can I Help You Today?",
     },
-  ] );
+  ]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const messagesEndRef = useRef( null );
+  const messagesEndRef = useRef(null);
   const { isSignedIn } = useAuth();
   const router = useRouter();
-  
-   useEffect(() => {
-     if (!isSignedIn) {
-       router.push("/sign-in");
-     }
-   }, [isSignedIn, router]);
+
+  useEffect(() => {
+    if (!isSignedIn) {
+      router.push("/sign-in");
+    }
+  }, [isSignedIn, router]);
 
   const sendMessage = async () => {
     if (!message.trim()) return;
@@ -232,7 +232,8 @@ export default function Chatbot() {
           align="center"
           sx={{ padding: 2 }}
         >
-          &copy; 2024 Emergence. All rights reserved.
+          &copy; 2024 Emergence. All rights reserved. <br />
+         <br /> Emergence might give some off responses.
         </Typography>
         <Box textAlign="center" padding={3} mt={1}>
           <Button

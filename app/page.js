@@ -23,12 +23,12 @@ const LoaderComponent = dynamic(() => import("./components/LoaderComponent"), {
 export default function HomePage() {
   return (
     <Box
-      width="100%"
-      height="98vh"
-      display="flex"
-      flexDirection="column"
-      justifyContent="center"
-      alignItems="center"
+        width="100vw"
+        height="100vh"  
+        display="flex"
+        flexDirection="column"
+        justifyContent="center"
+        alignItems="center"
       sx={{
         backgroundImage: `url("data:image/svg+xml;utf8,${encodeURIComponent(
           svgBackground
