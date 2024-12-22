@@ -20,6 +20,7 @@
     "@mui/icons-material": "^5.16.12",
     "@mui/material": "^5.16.7",
     "@nextui-org/button": "^2.0.38",
+    "@vercel/analytics": "^1.4.1",
     "dotenv": "^16.4.5",
     "ldrs": "^1.0.2",
     "motion": "^11.11.17",
