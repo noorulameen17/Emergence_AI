@@ -1,98 +1,84 @@
-<div align="center" id="top"> 
-  <img src="./.github/app.gif" alt="Chatbot" />
+<div align="center"> 
 
-  &#xa0;
+# Emergence AI 🚨
 
-  <!-- <a href="https://chatbot.netlify.app">Demo</a> -->
+![Emergence AI](https://socialify.git.ci/noorulameen17/emergence/image?description=1&descriptionEditable=&font=KoHo&language=1&name=1&pattern=Floating%20Cogs&theme=Auto)
+
+[![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![Cerebras](https://img.shields.io/badge/Cerebras-FF0000?style=for-the-badge&logo=cerebras&logoColor=white)](https://www.cerebras.net/)
+[![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![MUI](https://img.shields.io/badge/MUI-007FFF?style=for-the-badge&logo=mui&logoColor=white)](https://mui.com/)
+[![Clerk](https://img.shields.io/badge/Clerk-6C47FF?style=for-the-badge&logo=clerk&logoColor=white)](https://clerk.dev/)
+[![Motion](https://img.shields.io/badge/Motion-000000?style=for-the-badge&logo=framer&logoColor=white)](https://www.framer.com/motion/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
+
 </div>
 
-<h1 align="center">Chatbot</h1>
+## Description
+Emergence AI is an intelligent disaster management system that provides concise, actionable advice for before, during, and after disasters. The AI assistant helps users prepare for, respond to, and recover from emergency situations with clear and direct guidance.
 
-<p align="center">
-  <img alt="Github top language" src="https://img.shields.io/github/languages/top/{{YOUR_GITHUB_USERNAME}}/chatbot?color=56BEB8">
+## Project Demo
+🔗 [Live Demo](https://emergence-ai.vercel.app)
 
-  <img alt="Github language count" src="https://img.shields.io/github/languages/count/{{YOUR_GITHUB_USERNAME}}/chatbot?color=56BEB8">
+## Project Screenshots
 
-  <img alt="Repository size" src="https://img.shields.io/github/repo-size/{{YOUR_GITHUB_USERNAME}}/chatbot?color=56BEB8">
+<div align="center">
+  <img src="https://github.com/noorulameen17/emergence/raw/main/public/emergence 1.png" alt="Emergence AI Homepage" width="800"/>
+  <br/><br/>
+  <img src="https://github.com/noorulameen17/emergence/raw/main/public/Emergence 2.png" alt="Chat Interface" width="800"/>
+  <br/><br/>
+  <img src="https://github.com/noorulameen17/emergence/raw/main/public/emergence 3.png" alt="AI Response" width="800"/>
+</div>
 
-  <img alt="License" src="https://img.shields.io/github/license/{{YOUR_GITHUB_USERNAME}}/chatbot?color=56BEB8">
+## Features
+- 🎯 Focused disaster-specific responses
+- ⚡ Real-time AI-powered advice
+- 📝 Structured guidance format:
+  - Pre-disaster preparation
+  - During disaster actions
+  - Post-disaster recovery
+- 🔄 Stream-based response generation
+- 🛡️ Input validation and filtering
+- 🔐 Secure authentication with Clerk
+- 💫 Smooth animations with Motion
+- 🎨 Modern UI with MUI components
 
-  <!-- <img alt="Github issues" src="https://img.shields.io/github/issues/{{YOUR_GITHUB_USERNAME}}/chatbot?color=56BEB8" /> -->
 
-  <!-- <img alt="Github forks" src="https://img.shields.io/github/forks/{{YOUR_GITHUB_USERNAME}}/chatbot?color=56BEB8" /> -->
-
-  <!-- <img alt="Github stars" src="https://img.shields.io/github/stars/{{YOUR_GITHUB_USERNAME}}/chatbot?color=56BEB8" /> -->
-</p>
-
-<!-- Status -->
-
-<!-- <h4 align="center"> 
-	🚧  Chatbot 🚀 Under construction...  🚧
-</h4> 
-
-<hr> -->
-
-<p align="center">
-  <a href="#dart-about">About</a> &#xa0; | &#xa0; 
-  <a href="#sparkles-features">Features</a> &#xa0; | &#xa0;
-  <a href="#rocket-technologies">Technologies</a> &#xa0; | &#xa0;
-  <a href="#white_check_mark-requirements">Requirements</a> &#xa0; | &#xa0;
-  <a href="#checkered_flag-starting">Starting</a> &#xa0; | &#xa0;
-  <a href="#memo-license">License</a> &#xa0; | &#xa0;
-  <a href="https://github.com/{{YOUR_GITHUB_USERNAME}}" target="_blank">Author</a>
-</p>
-
-<br>
-
-## :dart: About ##
-
-Describe your project
-
-## :sparkles: Features ##
-
-:heavy_check_mark: Feature 1;\
-:heavy_check_mark: Feature 2;\
-:heavy_check_mark: Feature 3;
-
-## :rocket: Technologies ##
-
-The following tools were used in this project:
-
-- [Expo](https://expo.io/)
-- [Node.js](https://nodejs.org/en/)
-- [React](https://pt-br.reactjs.org/)
-- [React Native](https://reactnative.dev/)
-- [TypeScript](https://www.typescriptlang.org/)
-
-## :white_check_mark: Requirements ##
-
-Before starting :checkered_flag:, you need to have [Git](https://git-scm.com) and [Node](https://nodejs.org/en/) installed.
-
-## :checkered_flag: Starting ##
-
+## Installation Steps
+1. Clone the repository :
 ```bash
-# Clone this project
-$ git clone https://github.com/{{YOUR_GITHUB_USERNAME}}/chatbot
-
-# Access
-$ cd chatbot
-
-# Install dependencies
-$ yarn
-
-# Run the project
-$ yarn start
-
-# The server will initialize in the <http://localhost:3000>
+git clone https://github.com/yourusername/emergence.git
+```
+2. Install dependencies : 
+```bash
+npm install
+```
+3. Set up environment variables :
+```bash
+CEREBAS_API_KEY=your_api_key_here
+CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+CLERK_SECRET_KEY=your_clerk_secret_key
+```
+4. Run the development server :
+```bash
+npm run dev
 ```
 
-## :memo: License ##
+5. Open http://localhost:3000 in your browser
 
-This project is under license from MIT. For more details, see the [LICENSE](LICENSE.md) file.
+## Technologies Used 
 
-
-Made with :heart: by <a href="https://github.com/{{YOUR_GITHUB_USERNAME}}" target="_blank">{{YOUR_NAME}}</a>
-
-&#xa0;
-
-<a href="#top">Back to top</a>
+- React - UI library
+- Next.js - Web framework
+- Cerebras SDK - AI model integration
+- JavaScript - Programming language
+- MUI (Material-UI) - UI component library
+- Clerk - Authentication and user management
+- Motion - Animation library
+- Edge Runtime - Server-side execution
+- Webpack - Module bundling
+- Environment Variables - Configuration management
+- Dynamic Imports - Code splitting
+- CSS Modules - Styling
+- SVG Backgrounds - Visual elements
