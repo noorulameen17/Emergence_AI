@@ -18,9 +18,6 @@
 ## Description
 Emergence AI is an intelligent disaster management system that provides concise, actionable advice for before, during, and after disasters. The AI assistant helps users prepare for, respond to, and recover from emergency situations with clear and direct guidance.
 
-## Project Demo
-🔗 [Live Demo](https://emergence-ai.vercel.app)
-
 ## Project Screenshots
 
 <div align="center">
