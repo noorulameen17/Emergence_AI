@@ -1,23 +1,55 @@
-import { Cerebras } from "@cerebras/cerebras_cloud_sdk";
+import { querySonar } from "@/lib/sonar";
 import { NextResponse } from "next/server";
 import { ReadableStream } from "stream/web";
 
-const cerebras = new Cerebras({
-  apiKey: process.env.CEREBAS_API_KEY,
-});
-
 const systemPrompt = `
-You are a Disaster Management AI. Provide concise, actionable advice:
+You are a Disaster Management AI Assistant. Your job is to provide accurate, concise, and actionable guidance for all disaster-related queries (floods, storms, earthquakes, fires, etc.). Always prioritize user safety and clarity.
 
-- Before: One key preparation step.
-- During: One immediate safety action.
-- After: One post-disaster recovery tip.
+Rules:
+1. Provide a short **summary** first (1–3 sentences) with the main advice.
+2. Follow up with **actionable steps** in bullet points if needed.
+3. Include **credible web links** from verified sources (government, NGOs, news) relevant to the topic.
+4. Avoid unnecessary jargon. Keep the language **simple and direct**.
+5. If unsure or information is missing, clearly say so and provide a **reliable link** for reference.
+6. Maintain a **friendly, reassuring tone** without sounding casual in emergencies.
+7. Format the response like this:
+   - **Summary:** ...
+   - **Emergency Lifelines (India):** ...  (show only disaster-response numbers relevant to the user; always show 112 first)
+   - **Actionable Steps:** ...
+   - **References:** [Link1](url), [Link2](url)
+8. Always aim for clarity, safety, and usefulness over verbosity.
+9. Assume the user is in India unless they clearly specify another country. If they specify another country, ask if they want India numbers as well; otherwise adapt lifelines to their country.
+10. Only display disaster-related lifelines in the response. Do NOT include non-disaster hotlines (e.g., Police 100, Women 181, Child 1098) unless the user's query explicitly concerns crime/safety, women in distress, or child welfare.
 
-Ensure responses are clear and direct, with a maximum of two lines in total. Avoid summaries or lengthy explanations.
-`;
+Emergency Lifelines (India):
+- All emergencies (nationwide): 112 (ERSS)
+- Fire: 101
+- Ambulance/Medical: 102 or 108 (state-dependent; include only if injuries/medical needs are mentioned or clearly implied)
+- Police/Crime/Safety: 100 (legacy) or 112 (include only if the query is about crime, violence, or law-and-order concerns)
+- Natural disasters (flood, cyclone, earthquake, landslide, etc.): 112 and State/District Disaster Management Control Room: 1070 (State) or 1077 (District) — availability varies by state
+- Women in distress: 181 (include only if the query is specifically about women in distress)
+- Child in distress: 1098 (CHILDLINE) (include only if the query is specifically about a child in distress)
 
-const nonDisasterResponse = `
-Please Only Ask For Disaster-Related Advice.
+When answering, include an "Emergency Lifelines (India)" line right after the Summary with ONLY the lifelines relevant to the user's situation. Always include 112 first for disasters. Do not list Police 100/112, Women 181, or Child 1098 unless explicitly relevant to the user's query.
+
+Example formatting:
+- Emergency Lifelines (India): 112 | SDMA 1070/1077 (for floods/cyclones/earthquakes/landslides) | Fire 101 (if fire) | Ambulance 102/108 (only if injuries/medical needs)
+
+Also include credible references where appropriate, e.g.:
+- ERSS (112): https://en.wikipedia.org/wiki/Emergency_telephone_number#India
+- NDMA (Disaster preparedness/SDMAs): https://ndma.gov.in/
+- CHILDLINE 1098: https://www.childlineindia.org/
+
+Example:
+**User:** "How do I prepare for a flood?"
+**Assistant:**
+**Summary:** Move to higher ground and avoid floodwater. Stay updated with alerts.
+**Emergency Lifelines (India):** 112 | SDMA 1070/1077
+**Actionable Steps:**
+- Pack essential items: food, water, medicines.
+- Avoid driving through flooded areas.
+- Follow instructions from local authorities.
+**References:** [FEMA Flood Safety](https://www.fema.gov/floods), [NDMA Floods](https://ndma.gov.in/)
 `;
 
 export async function POST(req) {
@@ -44,10 +76,7 @@ export async function POST(req) {
     const encoder = new TextEncoder();
     const readableStream = new ReadableStream({
       async start(controller) {
-        const chatCompletion = await getCerebrasChatCompletion(
-          cerebras,
-          data.messages
-        );
+        const chatCompletion = await getPerplexityChatCompletion(data.messages);
         controller.enqueue(
           encoder.encode(chatCompletion.choices[0].message.content)
         );
@@ -71,359 +100,12 @@ export async function POST(req) {
   }
 }
 
-export const getCerebrasChatCompletion = async (cerebras, messages) => {
-  const userMessage = messages[messages.length - 1].content.toLowerCase();
+export const getPerplexityChatCompletion = async (messages) => {
+  const lastUserMessage = messages.filter((m) => m.role === "user").pop();
 
-  if (!isDisasterRelated(userMessage)) {
-    return {
-      choices: [{ message: { content: nonDisasterResponse } }],
-    };
-  }
+  const result = await querySonar(lastUserMessage.content, systemPrompt);
 
-  return cerebras.chat.completions.create({
-    messages: [{ role: "system", content: systemPrompt }, ...messages],
-    model: "llama3.1-8b",
-  });
-};
-
-const isDisasterRelated = (message) => {
-  const disasterKeywords = [
-    'flood',
-    "earthquake",
-    "Tsunami",
-    "Landslide",
-    "Mudslide",
-    "Rockslide",
-    "Sinkhole",
-    "Avalanche",
-    "Volcanic eruption",
-    "Lava flow",
-    "Magma",
-    "Ashfall",
-    "Pyroclastic flow",
-    "Ash plume",
-    "Lava dome",
-    "Geyser eruption",
-    "Fumarole",
-    "Earthquake tremor",
-    "Aftershock",
-    "Foreshock",
-    "Tectonic shift",
-    "Fault line",
-    "fire",
-    "Seismic waves",
-    "Ground rupture",
-    "Fault zone",
-    "Seismic activity",
-    "Subduction zone",
-    "Coastal flood",
-    "Flash flood",
-    "Storm surge",
-    "River flood",
-    "crash",
-    "Overbank flood",
-    "Urban flooding",
-    "Glacier outburst flood",
-    "Snowmelt flood",
-    "Groundwater flooding",
-    "Ice jam",
-    "Tsunami wave",
-    "Hailstorm",
-    "Hail",
-    "Ice storm",
-    "Freezing rain",
-    "Sleet",
-    "Snowstorm",
-    "Blizzard",
-    "Polar vortex",
-    "Cold wave",
-    "Heatwave",
-    "Wildfire",
-    "Forest fire",
-    "Bushfire",
-    "Grassfire",
-    "Peat fire",
-    "Firestorm",
-    "Firebreak",
-    "drought",
-    "Desertification",
-    "Haboob",
-    "Sandstorm",
-    "Dust storm",
-    "Storm front",
-    "Tornado",
-    "Twister",
-    "Cyclone",
-    "Typhoon",
-    "Tropical depression",
-    "Superstorm",
-    "Super typhoon",
-    "Typhoon eye",
-    "Tornadic storm",
-    "Waterspout",
-    "Tornado outbreak",
-    "Lightning strike",
-    "Thunderstorm",
-    "Electrical storm",
-    "Microburst",
-    "Downburst",
-    "Squall line",
-    "Squall",
-    "Heat dome",
-    "Freezing fog",
-    "Whiteout",
-    "Polar cyclone",
-    "Arctic blast",
-    "Ice fog",
-    "Permafrost thaw",
-    "Landslip",
-    "Crater",
-    "Meteor strike",
-    "Asteroid impact",
-    "Meteorite fall",
-    "Comet collision",
-    "Solar flare",
-    "Solar storm",
-    "Coronal mass ejection",
-    "Geomagnetic storm",
-    "Magnetic field disturbance",
-    "Radiation storm",
-    "Gamma-ray burst",
-    "Solar wind",
-    "Space weather",
-    "Aurora",
-    "Earth tremor",
-    "Earthquake swarm",
-    "Volcanic ash",
-    "Magma eruption",
-    "Volcano collapse",
-    "Volcanic island",
-    "Earthquake fault",
-    "Underwater volcano",
-    "Fissure eruption",
-    "Ground subsidence",
-    "Karst collapse",
-    "Sinkhole formation",
-    "Crater lake",
-    "Coastal erosion",
-    "Rockfall",
-    "Ground shaking",
-    "Tsunami warning",
-    "Tremor",
-    "Quake",
-    "Seismic shock",
-    "Tidal wave",
-    "Rift eruption",
-    "Vesuvius eruption",
-    "Krakatoa eruption",
-    "Pyroclastic surge",
-    "Fumarolic eruption",
-    "Glacial lake outburst",
-    "Tornado funnel",
-    "Tornado vortex",
-    "Tropical storm",
-    "Extreme rainfall",
-    "Floodplain",
-    "Riverbank erosion",
-    "Coastal inundation",
-    "Ocean surge",
-    "Tsunami flood",
-    "Landslide debris",
-    "Fissure crack",
-    "Ash cloud",
-    "Lava lake",
-    "Volcano vent",
-    "Wind shear",
-    "Arctic sea ice loss",
-    "Global warming disaster",
-    "Atmospheric river",
-    "Cyclone intensity",
-    "Oceanic cyclone",
-    "Atmospheric pressure drop",
-    "Sea level rise",
-    "Glacier retreat",
-    "Earthquake aftershock",
-    "Ocean current disruption",
-    "Tsunami run-up",
-    "Eruption plume",
-    "Volcanic crater",
-    "Lava vent",
-    "Geyser eruption",
-    "Flood barrier breach",
-    "Earthquake fault zone",
-    "Extreme wind event",
-    "Severe heat",
-    "Firebreak",
-    "Blazing heat",
-    "Thermal expansion",
-    "Saltwater intrusion",
-    "Water table depletion",
-    "Biome shift",
-    "Habitat destruction",
-    "Coral reef bleaching",
-    "Algal bloom",
-    "Ocean acidification",
-    "Crop failure",
-    "Food scarcity",
-    "Pest invasion",
-    "Locust swarm",
-    "Invasive species",
-    "Landslide risk",
-    "Weather anomaly",
-    "Tornadic winds",
-    "Tornado alley",
-    "Erosion zone",
-    "Tornado funnel cloud",
-    "Ice storm damage",
-    "Treefall",
-    "Debris flow",
-    "Storm damage",
-    "Cyclone destruction",
-    "Extreme flooding",
-    "Glacial advance",
-    "Snowdrift",
-    "Snow squall",
-    "Heat stress",
-    "Animal migration shift",
-    "Melting glaciers",
-    "Fungal outbreak",
-    "Forest dieback",
-    "Groundwater depletion",
-    "Acid rain",
-    "Dead zone",
-    "Ocean warming",
-    "Agricultural drought",
-    "Wildland fire",
-    "Flash drought",
-    "Brownout",
-    "Wildfire smoke",
-    "Wildfire evacuation",
-    "Emergency relief",
-    "Volcano eruption prediction",
-    "Meteorological disaster",
-    "Eruption prediction",
-    "Geophysical hazard",
-    "Storm system",
-    "Fault slip",
-    "whirlpool",
-    "Storm track",
-    "Atmospheric instability",
-    "Precipitation deficit",
-    "Water scarcity",
-    "Radiological storm",
-    "Coronal mass ejection hazard",
-    "Climate variability",
-    "Oceanic warming",
-    "Severe weather outbreak",
-    "Industrial accident",
-    "Chemical spill",
-    "Oil spill",
-    "Nuclear accident",
-    "Nuclear meltdown",
-    "Radiation leak",
-    "Toxic waste contamination",
-    "Gas explosion",
-    "Mining disaster",
-    "Building collapse",
-    "Bridge collapse",
-    "Dam failure",
-    "Levee breach",
-    "Pipeline explosion",
-    "Airplane crash",
-    "Train derailment",
-    "Shipwreck",
-    "Traffic accident",
-    "Vehicle crash",
-    "Fire outbreak",
-    "Arson",
-    "Terrorist attack",
-    "Bomb explosion",
-    "Chemical weapon attack",
-    "Biological warfare",
-    "Cyberattack",
-    "Data breach",
-    "Toxic air pollution",
-    "Water contamination",
-    "Sewage spill",
-    "Oil pipeline leak",
-    "Fracking accident",
-    "Deforestation",
-    "Overfishing",
-    "Eutrophication",
-    "Land contamination",
-    "Illegal dumping",
-    "Habitat destruction",
-    "Wildlife trafficking",
-    "Fisheries collapse",
-    "Soil erosion",
-    "Desertification",
-    "Overgrazing",
-    "Invasive species introduction",
-    "Plastic pollution",
-    "Nuclear waste disposal issue",
-    "Mine tailings disaster",
-    "Landslide due to construction",
-    "Oil drilling accident",
-    "Water diversion disaster",
-    "Hydroelectric dam disaster",
-    "Asbestos exposure",
-    "Mercury poisoning",
-    "Lead contamination",
-    "Pesticide poisoning",
-    "Food poisoning",
-    "Contaminated water supply",
-    "Lead in drinking water",
-    "Construction site accidents",
-    "Elevator failure",
-    "Defective machinery accident",
-    "Power plant failure",
-    "Power outage",
-    "Blackout",
-    "Electrical grid failure",
-    "Substation explosion",
-    "Nuclear power plant leak",
-    "Toxic gas leak",
-    "Water supply contamination",
-    "Plastic waste spill",
-    "Illegal logging",
-    "Illegal mining",
-    "Urban sprawl",
-    "Overpopulation",
-    "Housing crisis",
-    "Homelessness crisis",
-    "Unregulated industrial growth",
-    "Waste disposal issues",
-    "Accidental release of harmful chemicals",
-    "Corporate negligence",
-    "Overfarming",
-    "Climate engineering accident",
-    "Fracking-induced earthquakes",
-    "Geothermal energy mishap",
-    "Cultural heritage destruction",
-    "Mining-induced landslide",
-    "Illegal dumping of industrial waste",
-    "Forest clearance for agriculture",
-    "Agricultural runoff",
-    "Chemical fertilizers causing pollution",
-    "GMO crop contamination",
-    "Excessive urbanization",
-    "Pollution from heavy industries",
-    "Soil contamination from waste",
-    "Thermal pollution",
-    "Fracking-induced water contamination",
-    "Landfill collapse",
-    "Flooding due to infrastructure failure",
-    "Air pollution",
-    "Water pollution",
-    "Soil pollution",
-    "Chemical spill",
-    "Oil spill",
-    "Gas spill",
-    "Toxic waste spill",
-    "Radioactive waste spill",
-  ];
-  const lowerCaseMessage = message.toLowerCase();
-  return disasterKeywords.some((keyword) =>
-    lowerCaseMessage.includes(keyword.toLowerCase())
-  );
+  return {
+    choices: [{ message: { content: result.text } }],
+  };
 };

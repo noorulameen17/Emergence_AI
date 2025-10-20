@@ -1,83 +1,100 @@
 "use client";
-import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  Box,
-  Button,
-  IconButton,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
+
+import { Starfield } from "@/components/ui/starfield-1";
+import { useAuth, UserButton, useUser } from "@clerk/nextjs";
 import { motion } from "framer-motion";
-import dynamic from "next/dynamic";
+import { Treadmill } from "ldrs/react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import "../globals.css";
-import { svgBackground } from "../svgBackground";
-import { useAuth } from "@clerk/nextjs";
+import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
 
-const DotStream = dynamic(() => import("../components/DotStream"), {
-  ssr: false,
-  loading: () => (
-    <Box display="flex" justifyContent="center" alignItems="center"></Box>
-  ),
-});
+import { AnimatedShinyButton } from "@/components/ui/animated-shiny-button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { PlaceholdersAndVanishInput } from "@/components/ui/placeholders-and-vanish-input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
-const QuantumLoader = dynamic(() => import("../components/QuantumLoader"), {
-  ssr: false,
-  loading: () => (
-    <Box display="flex" justifyContent="center" alignItems="center"></Box>
-  ),
-});
+import {
+  AlertTriangle,
+  ArrowDown,
+  CloudLightning,
+  Droplets,
+  Flame,
+  Home,
+  ShieldCheck,
+  User,
+} from "lucide-react";
 
 export default function Chatbot() {
+  const { user: clerkUser } = useUser();
+  // Wait for auth to load before redirect decisions
+  const { isSignedIn, isLoaded } = useAuth();
   const [messages, setMessages] = useState([
     {
       role: "assistant",
-      content: "👋 Your Safety Is My Priority! How Can I Help You Today?",
+      content: "Your Safety Is My Priority! How Can I Help You Today?",
     },
   ]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showScrollDown, setShowScrollDown] = useState(false);
+  const [isNavigatingHome, setIsNavigatingHome] = useState(false);
+
   const messagesEndRef = useRef(null);
-  const { isSignedIn } = useAuth();
+  const scrollAreaRef = useRef(null);
+
   const router = useRouter();
 
   useEffect(() => {
-    if (!isSignedIn) {
-      router.push("/sign-in");
-    }
-  }, [isSignedIn, router]);
+    if (!isLoaded) return;
+    if (!isSignedIn) router.push("/");
+  }, [isLoaded, isSignedIn, router]);
+
+  const decoratePhases = (text) =>
+    text
+      .replace(/<strong>/g, "")
+      .replace(/<\/strong>/g, "")
+      .replace(/\\/g, "")
+      .replace(/\*/g, "")
+      .replace(
+        /Before/g,
+        '<span style="font-weight:600;color:var(--destructive)">Before</span>'
+      )
+      .replace(
+        /During/g,
+        '<span style="font-weight:600;color:var(--primary)">During</span>'
+      )
+      .replace(
+        /After/g,
+        '<span style="font-weight:600;color:var(--accent-foreground)">After</span>'
+      );
 
   const sendMessage = async () => {
     if (!message.trim()) return;
-
     setLoading(true);
     setError(null);
 
-    setMessages((prevMessages) => [
-      ...prevMessages,
-      { role: "user", content: message },
-    ]);
-
+    setMessages((prev) => [...prev, { role: "user", content: message }]);
+    const outgoing = message;
     setMessage("");
 
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: [...messages, { role: "user", content: message }],
+          messages: [...messages, { role: "user", content: outgoing }],
         }),
       });
 
-      if (!response.body) {
+      if (!response.body)
         throw new Error("ReadableStream not yet supported in this browser.");
-      }
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder("utf-8");
@@ -89,171 +106,408 @@ export default function Chatbot() {
         assistantMessage += decoder.decode(value, { stream: true });
       }
 
-      assistantMessage = assistantMessage
-        .replace(/<strong>/g, "")
-        .replace(/<\/strong>/g, "")
-        .replace(/\\/g, "")
-        .replace(/\*/g, "")
-        .replace(
-          /Before/g,
-          '<span style="font-Family: AmericanPurpose; color: red">Before</span>'
-        )
-        .replace(
-          /During/g,
-          '<span style="font-Family: AmericanPurpose; color: green">During</span>'
-        )
-        .replace(
-          /After/g,
-          '<span style="font-Family: AmericanPurpose; color: blue">After</span>'
-        );
-
-      setMessages((prevMessages) => [
-        ...prevMessages,
+      assistantMessage = decoratePhases(assistantMessage);
+      setMessages((prev) => [
+        ...prev,
         { role: "assistant", content: assistantMessage },
       ]);
-    } catch (error) {
-      console.error("Error sending message:", error);
-      setError("Oops, something went wrong. Please try again.");
+    } catch (err) {
+      console.error("[v0] Error sending message:", err);
+      setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
+  };
+
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    scrollToBottom();
   }, [messages]);
 
-  return (
-    <Box
-      width="100%"
-      height="98vh"
-      display="flex"
-      flexDirection="column"
-      justifyContent="space-between"
-      alignItems="center"
-      sx={{
-        backgroundImage: `url("data:image/svg+xml;utf8,${encodeURIComponent(
-          svgBackground
-        )}")`,
-        backgroundSize: "cover",
-      }}
-    >
-      <Box
-        flexGrow={1}
-        display="flex"
-        justifyContent="center"
-        paddingTop={"30px"}
-        alignItems="center"
+  useEffect(() => {
+    const el = scrollAreaRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
+      setShowScrollDown(!atBottom);
+    };
+    el.addEventListener("scroll", onScroll);
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const quickPrompts = [
+    {
+      label: "Fire",
+      icon: <Flame className="h-3.5 w-3.5 text-red-500" />,
+      prompt: "fire safety plan",
+      color: "red",
+    },
+    {
+      label: "Flood",
+      icon: <Droplets className="h-3.5 w-3.5 text-blue-500" />,
+      prompt: "flood preparation",
+      color: "blue",
+    },
+    {
+      label: "Storm",
+      icon: <CloudLightning className="h-3.5 w-3.5 text-gray-500" />,
+      prompt: "storm shelter tips",
+      color: "gray",
+    },
+    {
+      label: "Emergency Kit",
+      icon: <AlertTriangle className="h-3.5 w-3.5 text-yellow-500" />,
+      prompt: "build emergency kit list",
+      color: "yellow",
+    },
+  ];
+  const setQuick = (p) => setMessage(p);
+
+  const Typing = () => (
+    <div className="flex items-center gap-2 px-2">
+      <Avatar className="h-7 w-7 bg-primary/15 border border-primary/30 text-primary">
+        <AvatarFallback className="bg-transparent">
+          <Image
+            src="/bot.jpeg"
+            alt="Bot"
+            width={28}
+            height={28}
+            className="h-7 w-7 rounded-full object-cover"
+          />
+        </AvatarFallback>
+      </Avatar>
+      <div
+        className="flex items-center gap-1 text-muted-foreground"
+        aria-label="Assistant typing"
       >
-        <Stack
-          direction="column"
-          width="1000px"
-          height="500px"
-          border="1px solid black"
-          p={2}
-          spacing={5}
-        >
-          <Stack
-            direction="column"
-            spacing={2}
-            flexGrow={1}
-            overflow="auto"
-            maxHeight="100%"
-          >
-            {messages.map((message, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
+        <motion.span
+          animate={{ opacity: [0.2, 1, 0.2] }}
+          transition={{ duration: 1.2, repeat: Number.POSITIVE_INFINITY }}
+          className="h-1.5 w-1.5 rounded-full bg-current"
+        />
+        <motion.span
+          animate={{ opacity: [0.2, 1, 0.2] }}
+          transition={{
+            duration: 1.2,
+            repeat: Number.POSITIVE_INFINITY,
+            delay: 0.2,
+          }}
+          className="h-1.5 w-1.5 rounded-full bg-current"
+        />
+        <motion.span
+          animate={{ opacity: [0.2, 1, 0.2] }}
+          transition={{
+            duration: 1.2,
+            repeat: Number.POSITIVE_INFINITY,
+            delay: 0.4,
+          }}
+          className="h-1.5 w-1.5 rounded-full bg-current"
+        />
+      </div>
+    </div>
+  );
+
+  const bubbleVariants = {
+    hidden: { opacity: 0, y: 6, scale: 0.98 },
+    visible: { opacity: 1, y: 0, scale: 1 },
+  };
+
+  const goHome = () => {
+    setIsNavigatingHome(true);
+    router.push("/");
+  };
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "Emergence AI",
+    applicationCategory: "CommunicationApplication",
+    operatingSystem: "Web",
+    description:
+      "AI support for disaster preparedness and response. Step-by-step guidance during emergencies.",
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+    url: `${siteUrl}/generate`,
+  };
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: siteUrl,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Generate",
+        item: `${siteUrl}/generate`,
+      },
+    ],
+  };
+
+  return (
+    <TooltipProvider>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="min-h-screen flex flex-col bg-background text-foreground"
+      >
+        {/* Full-screen starfield background */}
+        <div className="fixed inset-0 z-0 pointer-events-none">
+          <Starfield opacity={0.15} speed={1} quantity={600} />
+        </div>
+
+        <header className="sticky top-0 z-10 border-b border-border/60 backdrop-blur bg-background/80">
+          <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-primary" />
+              <h1 className="text-base font-semibold tracking-wide">
+                Emergence • Disaster Assistant
+              </h1>
+              <Badge
+                variant="outline"
+                className="gap-1 border-green-500/30 text-green-600 dark:text-green-400"
+                aria-label="Operational status"
               >
-                <Box
-                  display="flex"
-                  justifyContent={
-                    message.role === "assistant" ? "flex-start" : "flex-end"
-                  }
-                >
-                  <Box
-                    bgcolor={
-                      message.role === "assistant" ? "#00acc1" : "#26a69a"
-                    }
-                    color="white"
-                    fontFamily={"dynapuff"}
-                    borderRadius={16}
-                    p={3}
-                    maxWidth="65%"
-                    whiteSpace="pre-wrap"
-                    dangerouslySetInnerHTML={{ __html: message.content }}
-                  />
-                </Box>
-              </motion.div>
-            ))}
-            <div ref={messagesEndRef} />
-          </Stack>
+                <span className="relative inline-flex h-2 w-2 items-center justify-center">
+                  <span className="absolute inline-flex h-2 w-2 animate-ping rounded-full bg-green-500/60" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
+                </span>
+                Online
+              </Badge>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="hidden gap-2 sm:flex">
+                {quickPrompts.map((q) => (
+                  <motion.div
+                    key={q.label}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                  >
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setQuick(q.prompt)}
+                      className={`h-8 rounded-full border-${q.color}-500/70 text-${q.color}-700 hover:border-primary hover:bg-${q.color}-50`}
+                    >
+                      <span className="mr-1.5">{q.icon}</span>
+                      {q.label}
+                    </Button>
+                  </motion.div>
+                ))}
+              </div>
 
-          {loading && (
-            <Box display="flex" justifyContent="center" alignItems="center">
-              <DotStream />
-            </Box>
-          )}
+              <div className="ml-2">
+                <UserButton afterSignOutUrl="/" />
+              </div>
+            </div>
+          </div>
+        </header>
 
-          {error && (
-            <Typography variant="body2" color="error">
-              {error}
-            </Typography>
-          )}
-
-          <Stack direction="row" spacing={2}>
-            <TextField
-              label="Disaster Related Queries..."
-              fullWidth
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-            />
-            <IconButton
-              onClick={sendMessage}
-              disabled={loading}
-              sx={{ color: "#00695c", "&:hover": { color: "#00897b" } }}
-            >
-              {loading ? (
-                typeof window !== "undefined" ? (
-                  <QuantumLoader />
-                ) : null
-              ) : (
-                <FontAwesomeIcon icon={faPaperPlane} />
-              )}
-            </IconButton>
-          </Stack>
-        </Stack>
-      </Box>
-      <footer>
-        <Typography
-          variant="body2"
-          color="textSecondary"
-          align="center"
-          sx={{ padding: 2 }}
-        >
-          &copy; 2024 Emergence. All rights reserved. <br />
-         <br /> Emergence might give some off responses.
-        </Typography>
-        <Box textAlign="center" padding={3} mt={1}>
-          <Button
-            variant="outlined"
-            onClick={() => router.push("/")}
-            sx={{
-              color: "white",
-              borderColor: "white",
-              boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-              "&:hover": {
-                backgroundColor: "rgba(238, 100, 238, 0.1)",
-                borderColor: "#0CABA8",
-                boxShadow: "1px 3px 8px 5px #0CABA8",
-              },
+        <main className="flex-1 px-3 py-4 md:px-6 md:py-6">
+          <div
+            className="relative mx-auto flex max-w-5xl flex-col overflow-hidden rounded-xl border border-border/70 bg-background/60"
+            style={{
+              backgroundImage:
+                "radial-gradient(700px 400px at 10% -10%, color-mix(in oklab, var(--primary) 15%, transparent) 0%, transparent 60%), radial-gradient(600px 380px at 100% 0%, color-mix(in oklab, var(--accent) 16%, transparent) 0%, transparent 60%)",
             }}
           >
-            Back to Home
-          </Button>
-        </Box>
-      </footer>
-    </Box>
+            {/* Messages */}
+            <ScrollArea
+              ref={scrollAreaRef}
+              className="h-[calc(72vh)] w-full p-3 md:p-4"
+            >
+              <div className="flex flex-col gap-3">
+                {messages.map((m, idx) => (
+                  <motion.div
+                    key={idx}
+                    variants={bubbleVariants}
+                    initial="hidden"
+                    animate="visible"
+                    transition={{ duration: 0.18, ease: "easeOut" }}
+                  >
+                    <div
+                      className={`flex items-start gap-2 ${
+                        m.role === "assistant" ? "justify-start" : "justify-end"
+                      }`}
+                    >
+                      {m.role === "assistant" && (
+                        <Avatar className="h-7 w-7 bg-primary/15 border border-primary/30 text-primary">
+                          <AvatarFallback className="bg-transparent">
+                            <Image
+                              src="/bot.jpeg"
+                              alt="Bot"
+                              width={28}
+                              height={28}
+                              className="h-7 w-7 rounded-full object-cover"
+                            />
+                          </AvatarFallback>
+                        </Avatar>
+                      )}
+
+                      <div
+                        className={`max-w-[72%] rounded-2xl border px-3 py-2 text-[0.925rem] leading-relaxed md:px-4 md:py-2.5 ${
+                          m.role === "assistant"
+                            ? "border-primary/30 bg-primary/10"
+                            : "border-accent/30 bg-accent/10"
+                        }`}
+                      >
+                        <ReactMarkdown
+                          rehypePlugins={[rehypeRaw]}
+                          components={{
+                            a: ({ href, children }) => (
+                              <a
+                                href={href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-primary underline underline-offset-2"
+                              >
+                                {children}
+                              </a>
+                            ),
+                            p: ({ children }) => (
+                              <p className="text-pretty text-foreground/90">
+                                {children}
+                              </p>
+                            ),
+                            li: ({ children }) => (
+                              <li className="ml-4 list-disc text-foreground/90">
+                                {children}
+                              </li>
+                            ),
+                          }}
+                        >
+                          {m.content}
+                        </ReactMarkdown>
+                      </div>
+
+                      {m.role === "user" && (
+                        <Avatar className="h-7 w-7 border border-border/60 text-foreground/80">
+                          <AvatarFallback className="bg-muted text-foreground/80">
+                            {clerkUser?.profileImageUrl ||
+                            clerkUser?.imageUrl ? (
+                              <Image
+                                src={
+                                  clerkUser?.profileImageUrl ||
+                                  clerkUser?.imageUrl
+                                }
+                                alt={clerkUser?.firstName || "User"}
+                                width={28}
+                                height={28}
+                                unoptimized
+                                className="h-7 w-7 rounded-full object-cover"
+                              />
+                            ) : (
+                              <User className="h-3.5 w-3.5" />
+                            )}
+                          </AvatarFallback>
+                        </Avatar>
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
+
+                {loading && <Typing />}
+
+                {error && (
+                  <p role="alert" className="px-1 text-sm text-destructive">
+                    {error}
+                  </p>
+                )}
+
+                <div ref={messagesEndRef} />
+              </div>
+            </ScrollArea>
+
+            <Separator />
+
+            {/* Composer */}
+            <div className="w-full px-2.5 py-2 md:px-3">
+              <div className="flex items-center gap-2">
+                <PlaceholdersAndVanishInput
+                  fullWidth
+                  className="pl-2 pr-12"
+                  placeholders={[
+                    "Ask about fire, flood, storms…",
+                    "Fire safety plan",
+                    "Flood preparation",
+                    "Storm shelter tips",
+                    "Build an emergency kit list",
+                  ]}
+                  preset={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onSubmit={() => sendMessage()}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Scroll-to-bottom */}
+          {showScrollDown && (
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0 }}
+              transition={{ type: "spring", stiffness: 500, damping: 30 }}
+            >
+              <Button
+                onClick={scrollToBottom}
+                variant="ghost"
+                aria-label="Scroll to latest message"
+                className="fixed bottom-24 right-6 rounded-full border border-primary/40 bg-background/80 text-primary hover:bg-primary/10"
+                size="icon"
+              >
+                <ArrowDown className="h-4 w-4" />
+              </Button>
+            </motion.div>
+          )}
+        </main>
+
+        {/* Footer */}
+        <footer className="relative z-20 border-t border-border/60 bg-background/80">
+          <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-2 px-4 py-3 sm:flex-row">
+            <p className="text-xs text-foreground/100">
+              © 2025 Emergence. Responses May Be Imperfect - Always Follow
+              Official Guidance
+            </p>
+            <Button
+              variant="outline"
+              onClick={() => router.push("/")}
+              className="hidden"
+            />
+            {/* Use button variant to intercept click and show loader */}
+            <AnimatedShinyButton className="rounded-xl" onClick={goHome}>
+              <Home className="h-4 w-4 mr-2" />
+              Back to Home
+            </AnimatedShinyButton>
+          </div>
+        </footer>
+
+        {isNavigatingHome && (
+          <div className="fixed inset-0 z-50 grid place-items-center bg-background/80 backdrop-blur-sm">
+            <Treadmill size="70" speed="1.25" color="black" />
+          </div>
+        )}
+      </motion.div>
+    </TooltipProvider>
   );
 }
