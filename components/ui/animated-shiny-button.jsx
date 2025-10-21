@@ -1,12 +1,27 @@
 "use client";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Loader2 } from "lucide-react";
 
 export function AnimatedShinyButton({
   children,
   className = "",
   url,
+  isLoading = false,
+  compactOnMobile = false,
+  compactOnTablet = false,
+  onClick,
   ...props
 }) {
+  const handleClick = (e) => {
+    if (isLoading) {
+      e.preventDefault();
+      return;
+    }
+    if (onClick) onClick(e);
+  };
+
+  const compactClass = compactOnMobile ? "shiny-cta--compact" : "";
+  const compactMdClass = compactOnTablet ? "shiny-cta--compact-md" : "";
+
   return (
     <>
       <style jsx>{`
@@ -76,6 +91,27 @@ export function AnimatedShinyButton({
           transition: var(--transition);
           transition-property: --gradient-angle-offset, --gradient-percent,
             --gradient-shine;
+        }
+
+        /* Compact on mobile only for instances that opt-in */
+        @media (max-width: 640px) {
+          .shiny-cta.shiny-cta--compact,
+          .shiny-cta-link.shiny-cta--compact {
+            padding: 0.5rem 0.9rem;
+            font-size: 0.875rem; /* 14px */
+            border-radius: 0.5rem;
+          }
+        }
+
+        /* Compact on tablet (md: 768px–1023px) for instances that opt-in */
+        @media (min-width: 768px) and (max-width: 1023.98px) {
+          .shiny-cta.shiny-cta--compact-md,
+          .shiny-cta-link.shiny-cta--compact-md {
+            padding: 0.5rem 1rem; /* reduce vertical padding */
+            font-size: 0.9375rem; /* 15px for better legibility */
+            min-height: 2.25rem; /* ~h-9 */
+            border-radius: 0.5rem;
+          }
         }
 
         /* Link-specific styles */
@@ -233,19 +269,37 @@ export function AnimatedShinyButton({
       {url ? (
         <a
           href={url}
-          className={`shiny-cta-link group ${className}`}
-          onClick={props.onClick}
+          className={`shiny-cta-link group ${compactClass} ${compactMdClass} ${className} ${
+            isLoading ? "pointer-events-none opacity-90" : ""
+          }`}
+          onClick={handleClick}
+          aria-disabled={isLoading}
+          aria-busy={isLoading}
         >
           <span className="flex items-center">
             {children}
-            <ChevronRight className="ml-1 size-4 shrink-0 transition-all duration-300 ease-out group-hover:translate-x-1" />
+            {isLoading ? (
+              <Loader2 className="ml-1 size-4 shrink-0 animate-spin" />
+            ) : (
+              <ChevronRight className="ml-1 size-4 shrink-0 transition-all duration-300 ease-out group-hover:translate-x-1" />
+            )}
           </span>
         </a>
       ) : (
-        <button className={`shiny-cta group ${className}`} {...props}>
+        <button
+          className={`shiny-cta group ${compactClass} ${compactMdClass} ${className}`}
+          onClick={handleClick}
+          disabled={isLoading || props.disabled}
+          aria-busy={isLoading}
+          {...props}
+        >
           <span className="flex items-center">
             {children}
-            <ChevronRight className="ml-1 size-4 shrink-0 transition-all duration-300 ease-out group-hover:translate-x-1" />
+            {isLoading ? (
+              <Loader2 className="ml-1 size-4 shrink-0 animate-spin" />
+            ) : (
+              <ChevronRight className="ml-1 size-4 shrink-0 transition-all duration-300 ease-out group-hover:translate-x-1" />
+            )}
           </span>
         </button>
       )}

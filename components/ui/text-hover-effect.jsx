@@ -2,7 +2,12 @@
 import { motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
-export const TextHoverEffect = ({ text, duration }) => {
+export const TextHoverEffect = ({
+  text,
+  duration,
+  yPercent = 50,
+  baseline = "middle",
+}) => {
   const svgRef = useRef(null);
   const [cursor, setCursor] = useState({ x: 0, y: 0 });
   const [hovered, setHovered] = useState(false);
@@ -12,14 +17,8 @@ export const TextHoverEffect = ({ text, duration }) => {
     if (svgRef.current && cursor.x !== null && cursor.y !== null) {
       const svgRect = svgRef.current.getBoundingClientRect();
       const cxPercentage = ((cursor.x - svgRect.left) / svgRect.width) * 100;
-      const cyPercentage =
-        ((cursor.y - svgRect.top) /
-          svgRef.current.getBoundingClientRect().height) *
-        100;
-      setMaskPosition({
-        cx: `${cxPercentage}%`,
-        cy: `${cyPercentage}%`,
-      });
+      const cyPercentage = ((cursor.y - svgRect.top) / svgRect.height) * 100;
+      setMaskPosition({ cx: `${cxPercentage}%`, cy: `${cyPercentage}%` });
     }
   }, [cursor]);
 
@@ -75,41 +74,38 @@ export const TextHoverEffect = ({ text, duration }) => {
           />
         </mask>
       </defs>
+
       <text
         x="50%"
-        y="50%"
+        y={`${yPercent}%`}
         textAnchor="middle"
-        dominantBaseline="middle"
+        dominantBaseline={baseline}
         strokeWidth="0.3"
         className="fill-transparent stroke-neutral-200 [font-family:var(--font-space-grotesk)] text-7xl font-bold dark:stroke-neutral-800"
         style={{ opacity: hovered ? 0.7 : 0 }}
       >
         {text}
       </text>
+
       <motion.text
         x="50%"
-        y="50%"
+        y={`${yPercent}%`}
         textAnchor="middle"
-        dominantBaseline="middle"
+        dominantBaseline={baseline}
         strokeWidth="0.3"
         className="fill-transparent stroke-neutral-200 [font-family:var(--font-space-grotesk)] text-7xl font-bold dark:stroke-neutral-800"
         initial={{ strokeDashoffset: 1000, strokeDasharray: 1000 }}
-        animate={{
-          strokeDashoffset: 0,
-          strokeDasharray: 1000,
-        }}
-        transition={{
-          duration: 4,
-          ease: "easeInOut",
-        }}
+        animate={{ strokeDashoffset: 0, strokeDasharray: 1000 }}
+        transition={{ duration: 4, ease: "easeInOut" }}
       >
         {text}
       </motion.text>
+
       <text
         x="50%"
-        y="50%"
+        y={`${yPercent}%`}
         textAnchor="middle"
-        dominantBaseline="middle"
+        dominantBaseline={baseline}
         stroke="url(#textGradient)"
         strokeWidth="0.3"
         mask="url(#textMask)"
