@@ -32,7 +32,6 @@ import {
 
 export default function Chatbot() {
   const { user: clerkUser } = useUser();
-  // Wait for auth to load before redirect decisions
   const { isSignedIn, isLoaded } = useAuth();
   const [messages, setMessages] = useState([
     {
@@ -45,6 +44,8 @@ export default function Chatbot() {
   const [error, setError] = useState(null);
   const [showScrollDown, setShowScrollDown] = useState(false);
   const [isNavigatingHome, setIsNavigatingHome] = useState(false);
+  // Apply Clerk popover appearance only on mobile; restore defaults on desktop
+  const [isMobile, setIsMobile] = useState(false);
 
   const messagesEndRef = useRef(null);
   const scrollAreaRef = useRef(null);
@@ -55,6 +56,16 @@ export default function Chatbot() {
     if (!isLoaded) return;
     if (!isSignedIn) router.push("/");
   }, [isLoaded, isSignedIn, router]);
+
+  // Detect mobile viewport to scope Clerk dialog overrides to mobile only
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mql = window.matchMedia("(max-width: 639px)");
+    const onChange = (e) => setIsMobile(e.matches);
+    setIsMobile(mql.matches);
+    mql.addEventListener("change", onChange);
+    return () => mql.removeEventListener("change", onChange);
+  }, []);
 
   const decoratePhases = (text) =>
     text
@@ -277,9 +288,9 @@ export default function Chatbot() {
 
         <header className="sticky top-0 z-10 border-b border-border/60 backdrop-blur bg-background/80">
           <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-            <div className="flex items-center gap-2">
+            <div className="flex min-w-0 flex-1 items-center gap-2">
               <ShieldCheck className="h-5 w-5 text-primary" />
-              <h1 className="text-base font-semibold tracking-wide">
+              <h1 className="text-sm sm:text-base md:text-xs lg:text-base font-semibold tracking-wide md:whitespace-nowrap md:truncate lg:whitespace-normal lg:overflow-visible lg:text-clip">
                 Emergence • Disaster Assistant
               </h1>
               <Badge
@@ -294,8 +305,8 @@ export default function Chatbot() {
                 Online
               </Badge>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="hidden gap-2 sm:flex">
+            <div className="flex items-center gap-2 shrink-0">
+              <div className="hidden md:flex md:flex-wrap md:max-w-[60vw] lg:max-w-none md:justify-end gap-1.5 lg:gap-2">
                 {quickPrompts.map((q) => (
                   <motion.div
                     key={q.label}
@@ -307,17 +318,40 @@ export default function Chatbot() {
                       variant="outline"
                       size="sm"
                       onClick={() => setQuick(q.prompt)}
-                      className={`h-8 rounded-full border-${q.color}-500/70 text-${q.color}-700 hover:border-primary hover:bg-${q.color}-50`}
+                      className={`md:h-7 lg:h-8 md:text-[11px] lg:text-sm md:px-2.5 lg:px-3 h-8 rounded-full border-${q.color}-500/70 text-${q.color}-700 hover:border-primary hover:bg-${q.color}-50`}
                     >
-                      <span className="mr-1.5">{q.icon}</span>
+                      <span className="mr-1 md:mr-1 lg:mr-1.5 md:scale-90 lg:scale-100">
+                        {q.icon}
+                      </span>
                       {q.label}
                     </Button>
                   </motion.div>
                 ))}
               </div>
 
-              <div className="ml-2">
-                <UserButton afterSignOutUrl="/" />
+              <div className="ml-1 sm:ml-2 scale-90 sm:scale-100 origin-right shrink-0">
+                <UserButton
+                  afterSignOutUrl="/"
+                  appearance={
+                    isMobile
+                      ? {
+                          elements: {
+                            // Popover card sizing and scale (mobile only)
+                            userButtonPopoverCard:
+                              "w-[208px] p-2 scale-90 origin-top-right",
+                            userButtonPopoverMain: "gap-1",
+                            userButtonPopoverFooter: "text-[10px] py-1",
+                            userButtonPopoverActionButton: "text-xs py-1.5",
+                            // Shrink header/title/subtitle and avatar on mobile
+                            userButtonPopoverTitle: "text-sm",
+                            userButtonPopoverSubtitle: "text-xs",
+                            userButtonPopoverAvatarBox: "h-8 w-8",
+                            userButtonPopoverActionButtonIcon: "size-4",
+                          },
+                        }
+                      : undefined
+                  }
+                />
               </div>
             </div>
           </div>
@@ -485,7 +519,7 @@ export default function Chatbot() {
         {/* Footer */}
         <footer className="relative z-20 border-t border-border/60 bg-background/80">
           <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-2 px-4 py-3 sm:flex-row">
-            <p className="text-xs text-foreground/100">
+            <p className="text-[9px] sm:text-xs text-foreground/100">
               © 2025 Emergence. Responses May Be Imperfect - Always Follow
               Official Guidance
             </p>
@@ -495,7 +529,11 @@ export default function Chatbot() {
               className="hidden"
             />
             {/* Use button variant to intercept click and show loader */}
-            <AnimatedShinyButton className="rounded-xl" onClick={goHome}>
+            <AnimatedShinyButton
+              className="rounded-xl"
+              compactOnMobile
+              onClick={goHome}
+            >
               <Home className="h-4 w-4 mr-2" />
               Back to Home
             </AnimatedShinyButton>
