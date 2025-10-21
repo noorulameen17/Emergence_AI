@@ -1,8 +1,8 @@
 import { querySonar } from "@/lib/sonar";
 import { NextResponse } from "next/server";
-import { ReadableStream } from "stream/web";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 const systemPrompt = `
 You are a Disaster Management AI Assistant. Your job is to provide accurate, concise, and actionable guidance for all disaster-related queries (floods, storms, earthquakes, fires, etc.). Always prioritize user safety and clarity.
@@ -75,18 +75,10 @@ export async function POST(req) {
       );
     }
 
-    const encoder = new TextEncoder();
-    const readableStream = new ReadableStream({
-      async start(controller) {
-        const chatCompletion = await getPerplexityChatCompletion(data.messages);
-        controller.enqueue(
-          encoder.encode(chatCompletion.choices[0].message.content)
-        );
-        controller.close();
-      },
-    });
+    const chatCompletion = await getPerplexityChatCompletion(data.messages);
+    const text = chatCompletion.choices[0].message.content || "";
 
-    return new NextResponse(readableStream, {
+    return new NextResponse(text, {
       headers: {
         "Content-Type": "text/plain; charset=utf-8",
         "Cache-Control": "no-cache",

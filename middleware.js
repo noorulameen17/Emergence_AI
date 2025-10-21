@@ -5,12 +5,10 @@ export default clerkMiddleware({
     "/",
     "/sign-in(.*)",
     "/sign-up(.*)",
-    "/api/chat",
-    "/api/chat(.*)",
   ],
   ignoredRoutes: ["/((?!api|trpc))(_next|.+..+)(.*)"],
 });
 
 export const config = {
-  matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
+  matcher: ["/((?!.*\\..*|_next|api|trpc).*)", "/"],
 };
